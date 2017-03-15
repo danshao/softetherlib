@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -43,17 +42,11 @@ func printOutput(outs []byte) {
 
 func main() {
 	// Create an *exec.Cmd
-	cmd := exec.Command("vpncmd", "/server", "localhost", "password:test", "statusget")
+	cmd := exec.Command("vpncmd", "/server", "127.0.0.1", "password:test", "/cmd", "serverstatus")
 
-	// Stdout buffer
-	cmdOutput := &bytes.Buffer{}
-	// Attach buffer to command
-	cmd.Stdout = cmdOutput
-
-	// Execute command
+	// Combine stdout and stderr
 	printCommand(cmd)
-	err := cmd.Run() // will wait for command to return
+	output, err := cmd.CombinedOutput()
 	printError(err)
-	// Only output the commands stdout
-	printOutput(cmdOutput.Bytes()) // => go version go1.3 darwin/amd64
+	printOutput(output) // => go version go1.3 darwin/amd64
 }
