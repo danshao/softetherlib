@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -41,6 +42,7 @@ func printOutput(outs []byte) {
 }
 
 func main() {
+	// Create an *exec.Cmd
 	cmd := exec.Command("go", "version")
 
 	// Stdout buffer
