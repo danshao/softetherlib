@@ -43,7 +43,7 @@ func printOutput(outs []byte) {
 
 func main() {
 	// Create an *exec.Cmd
-	cmd := exec.Command("go", "version")
+	cmd := exec.Command("vpncmd", "/server", "localhost", "password:test", "statusget")
 
 	// Stdout buffer
 	cmdOutput := &bytes.Buffer{}
