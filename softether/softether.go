@@ -19,25 +19,33 @@ type SoftEther struct {
 }
 
 var reFindIntegers *regexp.Regexp = regexp.MustCompile("[0-9]+")
+var cleanBytesOutput = func(aString string) (int, error) {
+	return strconv.Atoi(strings.Join(reFindIntegers.FindAllString(aString, -1), ""))
+}
 
 // GetServerStatus executes vpncmd and gets the server status info from the SoftEther server.
 // It returns a map of relevant information for the Subspace project and any error encountered.
+// @returns status map[string]string
+// @returns returnCode int
 func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int) {
+
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /cmd ServerStatusGet
 	cmd := exec.Command("vpncmd", "/server", s.IP, "/password:"+s.Password, "/cmd", "ServerStatusGet")
+
+	// Local variables
 	statusMap := make(map[string]string)
-	reFindIntegers := regexp.MustCompile("[0-9]+")
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
-	cmd.Stdout = cmdOutput       // Attach buffer to command
-	// printCommand(cmd)
-	err := cmd.Run() // Execute command
-	// printError(err)
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run()
 	if err != nil {
 		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
 		return
 	}
-	// printOutput(cmdOutput.Bytes())
 
-	// Open iostream for parsing
+	// Prepare iostream and extract data
 	outputScanner := bufio.NewScanner(bytes.NewReader(cmdOutput.Bytes()))
 	for outputScanner.Scan() {
 		if strings.Contains(outputScanner.Text(), "|") {
@@ -47,15 +55,15 @@ func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int)
 		}
 	}
 
-	// Calculate Outgoing and Incoming
-	outgoingUnicastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(statusMap["Outgoing Unicast Total Size"], -1), ""))
-	outgoingBroadcastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(statusMap["Outgoing Broadcast Total Size"], -1), ""))
+	// Perform calculations for outgoing and incoming traffic
+	outgoingUnicastBytes, _ := cleanBytesOutput(statusMap["Outgoing Unicast Total Size"])
+	outgoingBroadcastBytes, _ := cleanBytesOutput(statusMap["Outgoing Broadcast Total Size"])
+	incomingUnicastBytes, _ := cleanBytesOutput(statusMap["Incoming Unicast Total Size"])
+	incomingBroadcastBytes, _ := cleanBytesOutput(statusMap["Incoming Broadcast Total Size"])
 	outgoingTotalBytes := strconv.Itoa(outgoingBroadcastBytes + outgoingUnicastBytes)
-	incomingUnicastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(statusMap["Incoming Unicast Total Size"], -1), ""))
-	incomingBroadcastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(statusMap["Incoming Broadcast Total Size"], -1), ""))
 	incomingTotalBytes := strconv.Itoa(incomingBroadcastBytes + incomingUnicastBytes)
 
-	// Prepare final return map
+	// Put it all together
 	status = map[string]string{
 		"numberOfSessions":  statusMap["Number of Sessions"],
 		"numberOfUsers":     statusMap["Number of Users"],
@@ -68,21 +76,30 @@ func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int)
 	return
 }
 
+// GetUserInfo executes vpncmd and gets the details of a specific user
+// It returns a map of relevant information for the Subspace project and any error encountered.
+// @param id string
+// @returns userInfo map[string]string
+// @returns returnCode int
 func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCode int) {
+
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserGet [NAME]
 	cmd := exec.Command("vpncmd", "/server", s.IP, "/password:"+s.Password, "/hub:"+s.Hub, "/cmd", "UserGet", id)
+
+	// Local variables
 	userInfoMap := make(map[string]string)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
-	cmd.Stdout = cmdOutput       // Attach buffer to command
-	// printCommand(cmd)
-	err := cmd.Run() // will wait for command to return
-	// printError(err)
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run()
 	if err != nil {
 		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
 		return
 	}
-	// printOutput(cmdOutput.Bytes())
 
-	// Open iostream for parsing
+	// Prepare iostream and extract data
 	outputScanner := bufio.NewScanner(bytes.NewReader(cmdOutput.Bytes()))
 	for outputScanner.Scan() {
 		if strings.Contains(outputScanner.Text(), "|") {
@@ -92,15 +109,15 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 		}
 	}
 
-	// Calculate Outgoing and Incoming
-	outgoingUnicastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(userInfoMap["Outgoing Unicast Total Size"], -1), ""))
-	outgoingBroadcastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(userInfoMap["Outgoing Broadcast Total Size"], -1), ""))
+	// Perform calculations for outgoing and incoming traffic
+	outgoingUnicastBytes, _ := cleanBytesOutput(userInfoMap["Outgoing Unicast Total Size"])
+	outgoingBroadcastBytes, _ := cleanBytesOutput(userInfoMap["Outgoing Broadcast Total Size"])
+	incomingUnicastBytes, _ := cleanBytesOutput(userInfoMap["Incoming Unicast Total Size"])
+	incomingBroadcastBytes, _ := cleanBytesOutput(userInfoMap["Incoming Broadcast Total Size"])
 	outgoingTotalBytes := strconv.Itoa(outgoingBroadcastBytes + outgoingUnicastBytes)
-	incomingUnicastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(userInfoMap["Incoming Unicast Total Size"], -1), ""))
-	incomingBroadcastBytes, _ := strconv.Atoi(strings.Join(reFindIntegers.FindAllString(userInfoMap["Incoming Broadcast Total Size"], -1), ""))
 	incomingTotalBytes := strconv.Itoa(incomingBroadcastBytes + incomingUnicastBytes)
 
-	// Prepare final return map
+	// Put it all together
 	userInfo = map[string]string{
 		"email":          userInfoMap["Description"],
 		"alias":          userInfoMap["Full Name"],
@@ -113,6 +130,37 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 	}
 
 	return
+}
+
+// CreateUser executes vpncmd and creates a user
+// @param id string
+// @param email string
+// @param alias string ""
+func (s *SoftEther) CreateUser(args ...interface{}) {
+
+	// // Mandatory parameters
+	// var id string
+	// var email string
+
+	// // Optional parameters
+	// var alias string = ""
+
+	// // Ensure that we have at least 2 parameters
+	// if 2 > len(args) {
+	// 	panic("Not enough parameters.")
+	// }
+
+	// // Attach buffer to command output and execute
+	// cmd.Stdout = cmdOutput
+	// printCommand(cmd)
+	// err := cmd.Run() // will wait for command to return
+	// printError(err)
+	// if err != nil {
+	// 	returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+	// 	return
+	// }
+	// printOutput(cmdOutput.Bytes())
+
 }
 
 func printCommand(cmd *exec.Cmd) {
