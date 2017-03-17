@@ -11,12 +11,14 @@ import (
 	"strings"
 )
 
-// https://nathanleclaire.com/blog/2014/12/29/shelled-out-commands-in-golang/
+// SoftEther is a struct which holds the IP and Password of the SoftEther server
 type SoftEther struct {
 	IP       string
 	Password string
 }
 
+// GetServerStatus executes vpncmd and gets the server status info from the SoftEther server.
+// It returns a map of relevant information for the Subspace project and any error encountered.
 func (s *SoftEther) GetServerStatus() (map[string]string, int) {
 	cmd := exec.Command("vpncmd", "/server", s.IP, "/password:"+s.Password, "/cmd", "serverstatusget")
 	statusMap := make(map[string]string)
@@ -32,20 +34,15 @@ func (s *SoftEther) GetServerStatus() (map[string]string, int) {
 		errorCode, _ := strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
 		return make(map[string]string), errorCode
 	}
-	// Only output the commands stdout
 	// printOutput(cmdOutput.Bytes())
-	// fmt.Println(status)
-	// cmdOutputString := cmdOutput.String()
-	// fmt.Print(cmdOutputString)
 
-	// Open input stream for parsing
+	// Open iostream for parsing
 	outputScanner := bufio.NewScanner(bytes.NewReader(cmdOutput.Bytes()))
 
 	for outputScanner.Scan() {
 		if strings.Contains(outputScanner.Text(), "|") {
 			s := strings.Split(outputScanner.Text(), "|")
 			s[0] = strings.Trim(s[0], " ")
-			// s[0] = strings.Replace(s[0], " ", "", -1)
 			statusMap[s[0]] = s[1]
 		}
 	}
@@ -71,7 +68,6 @@ func (s *SoftEther) GetServerStatus() (map[string]string, int) {
 	return status, 0
 }
 
-// http://www.darrencoxall.com/golang/executing-commands-in-go/
 func printCommand(cmd *exec.Cmd) {
 	fmt.Printf("==> Executing: %s\n", strings.Join(cmd.Args, " "))
 }
