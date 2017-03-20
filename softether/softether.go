@@ -206,7 +206,7 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 	return
 }
 
-// UpdateUser executes vpncmd and updates a specific user's information
+// UpdateUserAlias executes vpncmd and updates a specific user's information
 // @param id string
 // @param alias string ""
 // @returns returnCode int
@@ -232,6 +232,33 @@ func (s *SoftEther) UpdateUserAlias(id string, alias string) (returnCode int) {
 		"/REALNAME:"+alias,
 		"/NOTE:"+email,
 		"/GROUP:",
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run() // will wait for command to return
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	return
+}
+
+// DeleteUser executes vpncmd and updates a specific user's information
+// @param id string
+// @returns returnCode int
+func (s *SoftEther) DeleteUser(id string) (returnCode int) {
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserDelete [NAME]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"UserDelete", id,
 	)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
 
