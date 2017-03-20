@@ -136,31 +136,76 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 // @param id string
 // @param email string
 // @param alias string ""
-func (s *SoftEther) CreateUser(args ...interface{}) {
+func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 
-	// // Mandatory parameters
-	// var id string
-	// var email string
+	// Mandatory parameters
+	var id string
+	var email string
 
-	// // Optional parameters
-	// var alias string = ""
+	// Optional parameters
+	var alias string = ""
 
-	// // Ensure that we have at least 2 parameters
-	// if 2 > len(args) {
-	// 	panic("Not enough parameters.")
-	// }
+	// Ensure that we have at least 2 parameters
+	if 2 > len(args) {
+		panic("Not enough parameters.")
+	}
 
-	// // Attach buffer to command output and execute
-	// cmd.Stdout = cmdOutput
-	// printCommand(cmd)
-	// err := cmd.Run() // will wait for command to return
-	// printError(err)
-	// if err != nil {
-	// 	returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
-	// 	return
-	// }
-	// printOutput(cmdOutput.Bytes())
+	// Get any parameters passed out of args
+	for i, p := range args {
+		switch i {
+		case 0: // id
+			param, ok := p.(string)
+			if !ok {
+				panic("First paramter (id) not type string.")
+			}
+			id = param
 
+		case 1: // email
+			param, ok := p.(string)
+			if !ok {
+				panic("Second parameter (email) not type string.")
+			}
+			email = param
+
+		case 2: // alias
+			param, ok := p.(string)
+			if !ok {
+				panic("Third parameter (alias) not type string.")
+			}
+			alias = param
+
+		default:
+			panic("Wrong parameter count.")
+		}
+	}
+
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserCreate [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"UserCreate", id,
+		"/REALNAME:"+alias,
+		"/NOTE:"+email,
+		"/GROUP:",
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	printCommand(cmd)
+	err := cmd.Run() // will wait for command to return
+	printError(err)
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+	printOutput(cmdOutput.Bytes())
+
+	return
 }
 
 func printCommand(cmd *exec.Cmd) {

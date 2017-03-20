@@ -9,4 +9,5 @@ func main() {
 
 	s.GetServerStatus()
 	s.GetUserInfo("dan")
+	s.CreateUser("1", "test@ecoworkinc.com", "Test Account")
 }
