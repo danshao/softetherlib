@@ -31,7 +31,13 @@ func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int)
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /cmd ServerStatusGet
-	cmd := exec.Command("vpncmd", "/server", s.IP, "/password:"+s.Password, "/cmd", "ServerStatusGet")
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/cmd",
+		"ServerStatusGet",
+	)
 
 	// Local variables
 	statusMap := make(map[string]string)
@@ -85,7 +91,14 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserGet [NAME]
-	cmd := exec.Command("vpncmd", "/server", s.IP, "/password:"+s.Password, "/hub:"+s.Hub, "/cmd", "UserGet", id)
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"UserGet", id,
+	)
 
 	// Local variables
 	userInfoMap := make(map[string]string)
