@@ -136,6 +136,7 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 // @param id string
 // @param email string
 // @param alias string ""
+// @returns returnCode int
 func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 
 	// Mandatory parameters
@@ -196,14 +197,51 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 
 	// Attach buffer to command output and execute
 	cmd.Stdout = cmdOutput
-	printCommand(cmd)
 	err := cmd.Run() // will wait for command to return
-	printError(err)
 	if err != nil {
 		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
 		return
 	}
-	printOutput(cmdOutput.Bytes())
+
+	return
+}
+
+// UpdateUser executes vpncmd and updates a specific user's information
+// @param id string
+// @param alias string ""
+// @returns returnCode int
+func (s *SoftEther) UpdateUserAlias(id string, alias string) (returnCode int) {
+
+	// First, let's get the user's email since we want to preserve this
+	existingUserInfo, e := s.GetUserInfo(id)
+	if e != 0 {
+		panic("Unable to get user's info")
+	}
+	email := existingUserInfo["email"]
+
+	// Now, let's update the user's alias
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserSet [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"UserSet", id,
+		"/REALNAME:"+alias,
+		"/NOTE:"+email,
+		"/GROUP:",
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run() // will wait for command to return
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
 
 	return
 }

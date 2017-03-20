@@ -1,6 +1,6 @@
 package softether
 
-var ERRORS = map[int]string{
+var errors = map[int]string{
 	0:   "ERR_NO_ERROR",
 	1:   "ERR_CONNECT_FAILED",
 	2:   "ERR_SERVER_IS_NOT_VPN",
@@ -150,5 +150,5 @@ var ERRORS = map[int]string{
 }
 
 func Strerror(errno int) string {
-	return ERRORS[errno]
+	return errors[errno]
 }
