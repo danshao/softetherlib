@@ -5,6 +5,13 @@ import (
 	"gitlab.ecoworkinc.com/subspace/softetherlib/softether"
 )
 
+var printMap = func(m map[string]string) {
+	for a, b := range m {
+		fmt.Printf("%s: %s\n", a, b)
+	}
+	fmt.Println("")
+}
+
 func main() {
 	s := softether.SoftEther{IP: "52.199.244.30", Password: "ecowork", Hub: "ecowork-aws"}
 
@@ -12,30 +19,22 @@ func main() {
 	serverStatus, _ := s.GetServerStatus()
 	fmt.Println("Server Status")
 	fmt.Println("-------------")
-	for a, b := range serverStatus {
-		fmt.Printf("%s: %s\n", a, b)
-	}
-	fmt.Println("")
+	printMap(serverStatus)
 
-	// Create User and Get User Info
+	// Create User, Set Password and Get User Info
 	s.CreateUser("1", "test@ecoworkinc.com", "New Account")
+	s.SetUserPassword("1", "abcde")
 	createdUser, _ := s.GetUserInfo("1")
 	fmt.Println("Created User")
 	fmt.Println("------------")
-	for a, b := range createdUser {
-		fmt.Printf("%s: %s\n", a, b)
-	}
-	fmt.Println("")
+	printMap(createdUser)
 
 	// Update the user alias
-	s.UpdateUserAlias("1", "Modified Account Name")
+	s.SetUserAlias("1", "Modified Account Name")
 	updatedUser, _ := s.GetUserInfo("1")
 	fmt.Println("Updated User Alias")
 	fmt.Println("------------------")
-	for a, b := range updatedUser {
-		fmt.Printf("%s: %s\n", a, b)
-	}
-	fmt.Println("")
+	printMap(updatedUser)
 
 	// Delete the user
 	s.DeleteUser("1")
