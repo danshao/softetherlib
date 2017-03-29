@@ -82,6 +82,64 @@ func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int)
 	return
 }
 
+// GetSessionList executes vpncmd and gets the session list from the SoftEther server for a specific hub.
+// It returns a map of relevant information for the Subspace project and any error encountered.
+// @returns sessionListMap map[int]map[string]string
+// @returns returnCode int
+func (s *SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, returnCode int) {
+
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionList
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"SessionList",
+	)
+
+	// Local variables
+	// var statusMapArr []int
+	sessionListMap = make(map[int]map[string]string)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run()
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	// Prepare iostream and extract data
+	outputScanner := bufio.NewScanner(bytes.NewReader(cmdOutput.Bytes()))
+	pos := 0
+	for outputScanner.Scan() {
+		if strings.Contains(outputScanner.Text(), "|") {
+			s := strings.Split(outputScanner.Text(), "|")
+			s[0] = strings.Trim(s[0], " ")
+
+			if _, ok := sessionListMap[pos]; !ok {
+				sessionListMap[pos] = make(map[string]string)
+			}
+
+			if s[0] == "Transfer Bytes" || s[0] == "Transfer Packets" {
+				aBytes, _ := cleanBytesOutput(s[1])
+				s[1] = strconv.Itoa(aBytes)
+			}
+
+			sessionListMap[pos][s[0]] = s[1]
+
+			if s[0] == "Transfer Packets" {
+				pos++
+			}
+		}
+	}
+
+	return
+}
+
 // GetUserInfo executes vpncmd and gets the details of a specific user
 // It returns a map of relevant information for the Subspace project and any error encountered.
 // @param id string

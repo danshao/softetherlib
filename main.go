@@ -21,6 +21,19 @@ func main() {
 	fmt.Println("-------------")
 	printMap(serverStatus)
 
+	// Get Session List
+	sessionList, _ := s.GetSessionList()
+	fmt.Println("Session List")
+	fmt.Println("-------------")
+	for a, session := range sessionList {
+		fmt.Printf("[Session %d]\n", a)
+		for c, d := range session {
+			fmt.Printf("%s: %s\n", c, d)
+		}
+		fmt.Println("")
+	}
+	fmt.Println("")
+
 	// Create User, Set Password and Get User Info
 	s.CreateUser("1", "test@ecoworkinc.com", "New Account")
 	s.SetUserPassword("1", "abcde")
