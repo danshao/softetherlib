@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// SoftEther is a struct which holds the IP, Password, and Hub of the SoftEther server
+// SoftEther is a struct which holds the IP, Password, and Hub of the SoftEther server.
 type SoftEther struct {
 	IP       string
 	Password string
@@ -24,9 +24,6 @@ var cleanBytesOutput = func(aString string) (int, error) {
 }
 
 // GetServerStatus executes vpncmd and gets the server status info from the SoftEther server.
-// It returns a map of relevant information for the Subspace project and any error encountered.
-// @returns status map[string]string
-// @returns returnCode int
 func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int) {
 
 	// Command to execute
@@ -82,10 +79,7 @@ func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int)
 	return
 }
 
-// GetSessionList executes vpncmd and gets the session list from the SoftEther server for a specific hub.
-// It returns a map of relevant information for the Subspace project and any error encountered.
-// @returns sessionListMap map[int]map[string]string
-// @returns returnCode int
+// GetSessionList executes vpncmd and gets the session list from the SoftEther server for a specific Hub.
 func (s *SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, returnCode int) {
 
 	// Command to execute
@@ -140,11 +134,7 @@ func (s *SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, 
 	return
 }
 
-// GetUserInfo executes vpncmd and gets the details of a specific user
-// It returns a map of relevant information for the Subspace project and any error encountered.
-// @param id string
-// @returns userInfo map[string]string
-// @returns returnCode int
+// GetUserInfo executes vpncmd and gets the details of a specific User for a specific Hub.
 func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCode int) {
 
 	// Command to execute
@@ -203,11 +193,7 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 	return
 }
 
-// CreateUser executes vpncmd and creates a user
-// @param id string
-// @param email string
-// @param alias string ""
-// @returns returnCode int
+// CreateUser executes vpncmd and creates a User for a specific Hub.
 func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 
 	// Mandatory parameters
@@ -277,10 +263,7 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 	return
 }
 
-// SetUserPassword executes vpncmd and updates a specific user's password
-// @param id string
-// @param password string
-// @return returnCode int
+// SetUserPassword executes vpncmd and updates a specific User's password in a specific Hub.
 func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int) {
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserPasswordSet [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
@@ -306,10 +289,7 @@ func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int)
 	return
 }
 
-// SetUserAlias executes vpncmd and updates a specific user's information
-// @param id string
-// @param alias string
-// @returns returnCode int
+// SetUserAlias executes vpncmd and updates a specific User's information in a specific Hub.
 func (s *SoftEther) SetUserAlias(id string, alias string) (returnCode int) {
 
 	// First, let's get the user's email since we want to preserve this
@@ -346,9 +326,7 @@ func (s *SoftEther) SetUserAlias(id string, alias string) (returnCode int) {
 	return
 }
 
-// DeleteUser executes vpncmd and updates a specific user's information
-// @param id string
-// @returns returnCode int
+// DeleteUser executes vpncmd and deletes a specific User in a specific Hub.
 func (s *SoftEther) DeleteUser(id string) (returnCode int) {
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserDelete [NAME]
