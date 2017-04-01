@@ -149,6 +149,7 @@ var errors = map[int]string{
 	148: "ERR_VPN_CONNECTION_DISCONNECTED_DUE_TO_SYSTEM_SUSPENSION",
 }
 
+// Strerror Given an error number, returns an error string
 func Strerror(errno int) string {
 	return errors[errno]
 }

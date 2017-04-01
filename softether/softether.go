@@ -11,14 +11,14 @@ import (
 	"strings"
 )
 
-// SoftEther is a struct which holds the IP and Password of the SoftEther server
+// SoftEther is a struct which holds the IP, Password, and Hub of the SoftEther server
 type SoftEther struct {
 	IP       string
 	Password string
 	Hub      string
 }
 
-var reFindIntegers *regexp.Regexp = regexp.MustCompile("[0-9]+")
+var reFindIntegers = regexp.MustCompile("[0-9]+")
 var cleanBytesOutput = func(aString string) (int, error) {
 	return strconv.Atoi(strings.Join(reFindIntegers.FindAllString(aString, -1), ""))
 }
@@ -215,7 +215,7 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 	var email string
 
 	// Optional parameters
-	var alias string = ""
+	var alias string
 
 	// Ensure that we have at least 2 parameters
 	if 2 > len(args) {
@@ -277,10 +277,10 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 	return
 }
 
-// UpdateUserAlias executes vpncmd and updates a specific user's information
+// SetUserPassword executes vpncmd and updates a specific user's password
 // @param id string
 // @param password string
-// @returns returnCode int
+// @return returnCode int
 func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int) {
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserPasswordSet [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
@@ -306,7 +306,7 @@ func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int)
 	return
 }
 
-// UpdateUserAlias executes vpncmd and updates a specific user's information
+// SetUserAlias executes vpncmd and updates a specific user's information
 // @param id string
 // @param alias string
 // @returns returnCode int
