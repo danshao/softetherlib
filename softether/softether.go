@@ -94,7 +94,6 @@ func (s *SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, 
 	)
 
 	// Local variables
-	// var statusMapArr []int
 	sessionListMap = make(map[int]map[string]string)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
 
@@ -129,6 +128,93 @@ func (s *SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, 
 				pos++
 			}
 		}
+	}
+
+	return
+}
+
+// GetSessionInfo executes vpncmd and gets the session information for a specific Session Name
+func (s *SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]string, returnCode int) {
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionGet [SESSION_NAME]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"SessionGet", sessionName,
+	)
+
+	// Local variables
+	sessionInfoMap := make(map[string]string)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run()
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	// Prepare iostream and extract data
+	outputScanner := bufio.NewScanner(bytes.NewReader(cmdOutput.Bytes()))
+	for outputScanner.Scan() {
+		if strings.Contains(outputScanner.Text(), "|") {
+			s := strings.Split(outputScanner.Text(), "|")
+			s[0] = strings.Trim(s[0], " ")
+			sessionInfoMap[s[0]] = s[1]
+		}
+	}
+
+	// Perform calculations for outgoing and incoming traffic
+	formatOutgoingBytes, _ := cleanBytesOutput(sessionInfoMap["Outgoing Data Size"])
+	formatIncomingBytes, _ := cleanBytesOutput(sessionInfoMap["Incoming Data Size"])
+	outgoingBytes := strconv.Itoa(formatOutgoingBytes)
+	incomingBytes := strconv.Itoa(formatIncomingBytes)
+
+	// Put it all together
+	sessionInfo = map[string]string{
+		"clientIPAddress":                sessionInfoMap["Client IP Address"],
+		"clientHostName":                 sessionInfoMap["Client Host Name"],
+		"userNameAuthentication":         sessionInfoMap["User Name (Authentication)"],
+		"userNameDatabase":               sessionInfoMap["User Name (Database)"],
+		"vlanID":                         sessionInfoMap["VLAN ID"],
+		"serverProductName":              sessionInfoMap["Server Product Name"],
+		"serverVersion":                  sessionInfoMap["Server Version"],
+		"serverBuild":                    sessionInfoMap["Server Build"],
+		"connectionStartedAt":            sessionInfoMap["Connection Started at"][0:11] + sessionInfoMap["Connection Started at"][17:],
+		"firstSessionEstablishedSince":   sessionInfoMap["First Session has been Established since"][0:11] + sessionInfoMap["First Session has been Established since"][17:],
+		"currentSessionEstablishedSince": sessionInfoMap["Current Session has been Established since"][0:11] + sessionInfoMap["Current Session has been Established since"][17:],
+		"halfDuplexTCPConnectionMode":    sessionInfoMap["Half Duplex TCP Connection Mode"],
+		"voipQosFunction":                sessionInfoMap["VoIP / QoS Function"],
+		"numberOfTCPConnections":         sessionInfoMap["Number of TCP Connections"],
+		"maximumNumberOfTCPConnections":  sessionInfoMap["Maximum Number of TCP Connections"],
+		"encryption":                     sessionInfoMap["Encryption"],
+		"compression":                    sessionInfoMap["Use of Compression"],
+		"physicalUnderlayProtocol":       sessionInfoMap["Physical Underlay Protocol"],
+		"udpAccelerationSupported":       sessionInfoMap["UDP Acceleration is Supported"],
+		"udpAccelerationActive":          sessionInfoMap["UDP Acceleration is Active"],
+		"sessionName":                    sessionInfoMap["Session Name"],
+		"connectionName":                 sessionInfoMap["Connection Name"],
+		"sessionKey":                     sessionInfoMap["Session Key (160 bit)"],
+		"bridgeRouterMode":               sessionInfoMap["Bridge / Router Mode"],
+		"monitoringMode":                 sessionInfoMap["Monitoring Mode"],
+		"clientProductNameReported":      sessionInfoMap["Client Product Name (Reported)"],
+		"clientVersionReported":          sessionInfoMap["Client Version (Reported)"],
+		"clientBuildReported":            sessionInfoMap["Client Build (Reported)"],
+		"clientOSNameReported":           sessionInfoMap["Client OS Name (Reported)"],
+		"clientOSVersionReported":        sessionInfoMap["Client OS Version (Reported)"],
+		"clientOSProductIDReported":      sessionInfoMap["Client OS Product ID (Reported)"],
+		"clientHostNameReported":         sessionInfoMap["Client Host Name (Reported)"],
+		"clientIPAddressReported":        sessionInfoMap["Client IP Address  (Reported)"],
+		"clientPortReported":             sessionInfoMap["Client Port (Reported)"],
+		"serverHostNameReported":         sessionInfoMap["Server Host Name (Reported)"],
+		"serverIPAddressReported":        sessionInfoMap["Server IP Address (Reported)"],
+		"serverPortReported":             sessionInfoMap["Server Port (Reported)"],
+		"incomingBytes":                  incomingBytes,
+		"outgoingBytes":                  outgoingBytes,
 	}
 
 	return

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"gitlab.ecoworkinc.com/subspace/softetherlib/softether"
 )
 
@@ -13,7 +14,7 @@ var printMap = func(m map[string]string) {
 }
 
 func main() {
-	s := softether.SoftEther{IP: "52.199.244.30", Password: "ecowork", Hub: "ecowork-aws"}
+	s := softether.SoftEther{IP: "174.129.59.153", Password: "subspace", Hub: "subspace"}
 
 	// Get Server Status
 	serverStatus, _ := s.GetServerStatus()
@@ -33,6 +34,12 @@ func main() {
 		fmt.Println("")
 	}
 	fmt.Println("")
+
+	// Get Session Info
+	fmt.Println("Session Info")
+	fmt.Println("-------------")
+	sessionInfo, _ := s.GetSessionInfo("SID-SECURENAT-1")
+	printMap(sessionInfo)
 
 	// Create User, Set Password and Get User Info
 	s.CreateUser("1", "test@ecoworkinc.com", "New Account")
