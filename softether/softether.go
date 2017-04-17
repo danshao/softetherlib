@@ -501,3 +501,33 @@ func printOutput(outs []byte) {
 		fmt.Printf("==> Output: %s\n", string(outs))
 	}
 }
+
+func (s *SoftEther) CancelExpireUser(username string) (returnCode int) {
+
+	// Get current time, set to one day before
+	// t := time.Now()
+	expirationDate := "none"
+
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserExpiresSet [SESSION_NAME] /EXPIRES:[EXPIRATION_DATE}]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"UserExpiresSet", username,
+		"/expires:"+expirationDate,
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run() // will wait for command to return
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	return
+}
