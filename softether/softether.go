@@ -377,7 +377,7 @@ func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int)
 }
 
 // SetUserAlias executes vpncmd and updates a specific User's information in a specific Hub.
-func (s *SoftEther) SetUserAlias(id, email, description string) (returnCode int) {
+func (s *SoftEther) SetUserInfo(id, email, description string) (returnCode int) {
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserSet [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
