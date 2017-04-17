@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // SoftEther is a struct which holds the IP, Password, and Hub of the SoftEther server.
@@ -423,6 +424,62 @@ func (s *SoftEther) DeleteUser(id string) (returnCode int) {
 		"/hub:"+s.Hub,
 		"/cmd",
 		"UserDelete", id,
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run() // will wait for command to return
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	return
+}
+
+// DisconnectSession executes vpncmd and disconnects a specific session
+func (s *SoftEther) DisconnectSession(sessionName string) (returnCode int) {
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionDisconnect [SESSION_NAME]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"SessionDisconnect", sessionName,
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run() // will wait for command to return
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	return
+}
+
+// ExpireUser executes vpncmd expires a specified Username
+func (s *SoftEther) ExpireUser(username string) (returnCode int) {
+
+	// Get current time, set to one day before
+	t := time.Now()
+	expirationDate := t.AddDate(0, 0, -1).Format("2006/01/02 15:04:05")
+
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserExpiresSet [SESSION_NAME] /EXPIRES:[EXPIRATION_DATE}]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"UserExpiresSet", username,
+		"/expires:"+expirationDate,
 	)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
 
