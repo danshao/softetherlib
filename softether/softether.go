@@ -288,7 +288,7 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 	var email string
 
 	// Optional parameters
-	var alias string
+	var description string
 
 	// Ensure that we have at least 2 parameters
 	if 2 > len(args) {
@@ -317,7 +317,7 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 			if !ok {
 				panic("Third parameter (description) not type string.")
 			}
-			alias = param
+			description = param
 
 		default:
 			panic("Wrong parameter count.")
