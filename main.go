@@ -50,7 +50,7 @@ func main() {
 	printMap(createdUser)
 
 	// Update User information
-	s.SetUserAlias("1", "modifiedtest@ecoworkinc.com", "Modified Account Name")
+	s.SetUserInfo("1", "modifiedtest@ecoworkinc.com", "Modified Account Name")
 	updatedUser, _ := s.GetUserInfo("1")
 	fmt.Println("Updated User Alias")
 	fmt.Println("------------------")

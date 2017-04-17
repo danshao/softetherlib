@@ -267,8 +267,8 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 
 	// Put it all together
 	userInfo = map[string]string{
-		"email":          userInfoMap["Description"],
-		"alias":          userInfoMap["Full Name"],
+		"description":    userInfoMap["Description"],
+		"email":          userInfoMap["Full Name"],
 		"numberOfLogins": userInfoMap["Number of Logins"],
 		"expirationDate": userInfoMap["Expiration Date"],
 		"creationDate":   userInfoMap["Created on"][0:11] + userInfoMap["Created on"][17:],
