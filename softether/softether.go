@@ -312,10 +312,10 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 			}
 			email = param
 
-		case 2: // alias
+		case 2: // description
 			param, ok := p.(string)
 			if !ok {
-				panic("Third parameter (alias) not type string.")
+				panic("Third parameter (description) not type string.")
 			}
 			alias = param
 
@@ -325,7 +325,7 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 	}
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserCreate [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserCreate [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
 	cmd := exec.Command(
 		"vpncmd",
 		"/server", s.IP,
@@ -333,8 +333,8 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 		"/hub:"+s.Hub,
 		"/cmd",
 		"UserCreate", id,
-		"/REALNAME:"+alias,
-		"/NOTE:"+email,
+		"/REALNAME:"+email,
+		"/NOTE:"+description,
 		"/GROUP:",
 	)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
@@ -377,10 +377,10 @@ func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int)
 }
 
 // SetUserAlias executes vpncmd and updates a specific User's information in a specific Hub.
-func (s *SoftEther) SetUserAlias(id, alias, email string) (returnCode int) {
+func (s *SoftEther) SetUserAlias(id, email, description string) (returnCode int) {
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserSet [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserSet [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
 	cmd := exec.Command(
 		"vpncmd",
 		"/server", s.IP,
@@ -388,8 +388,8 @@ func (s *SoftEther) SetUserAlias(id, alias, email string) (returnCode int) {
 		"/hub:"+s.Hub,
 		"/cmd",
 		"UserSet", id,
-		"/REALNAME:"+alias,
-		"/NOTE:"+email,
+		"/REALNAME:"+email,
+		"/NOTE:"+description,
 		"/GROUP:",
 	)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
