@@ -455,8 +455,8 @@ func (s SoftEther) DisconnectSession(sessionName string) (returnCode int) {
 	return
 }
 
-// UserEnabled executes vpncmd expires a specified Username
-func (s SoftEther) UserEnabled(username string, enabled bool) (returnCode int) {
+// SetUserEnabled executes vpncmd to enable/disable a specified Username
+func (s SoftEther) SetUserEnabled(username string, enabled bool) (returnCode int) {
 	var (
 		expirationDate string
 	)
