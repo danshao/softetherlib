@@ -57,14 +57,14 @@ func main() {
 	printMap(updatedUser)
 
 	// Revoke user
-	s.UserEnabled("1", false)
+	s.SetUserEnabled("1", false)
 	revokedUser, _ := s.GetUserInfo("1")
 	fmt.Println("Revoked User")
 	fmt.Println("------------------")
 	printMap(revokedUser)
 
 	// Reenable user
-	s.UserEnabled("1", true)
+	s.SetUserEnabled("1", true)
 	enabledUser, _ := s.GetUserInfo("1")
 	fmt.Println("Revoked User")
 	fmt.Println("------------------")
