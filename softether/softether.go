@@ -25,7 +25,7 @@ var cleanBytesOutput = func(aString string) (int, error) {
 }
 
 // GetServerStatus executes vpncmd and gets the server status info from the SoftEther server.
-func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int) {
+func (s SoftEther) GetServerStatus() (status map[string]string, returnCode int) {
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /cmd ServerStatusGet
@@ -81,7 +81,7 @@ func (s *SoftEther) GetServerStatus() (status map[string]string, returnCode int)
 }
 
 // GetSessionList executes vpncmd and gets the session list from the SoftEther server for a specific Hub.
-func (s *SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, returnCode int) {
+func (s SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, returnCode int) {
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionList
@@ -135,7 +135,7 @@ func (s *SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, 
 }
 
 // GetSessionInfo executes vpncmd and gets the session information for a specific Session Name
-func (s *SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]string, returnCode int) {
+func (s SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]string, returnCode int) {
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionGet [SESSION_NAME]
 	cmd := exec.Command(
@@ -222,7 +222,7 @@ func (s *SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]s
 }
 
 // GetUserInfo executes vpncmd and gets the details of a specific User for a specific Hub.
-func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCode int) {
+func (s SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCode int) {
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserGet [NAME]
@@ -281,7 +281,7 @@ func (s *SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCo
 }
 
 // CreateUser executes vpncmd and creates a User for a specific Hub.
-func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
+func (s SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 
 	// Mandatory parameters
 	var id string
@@ -351,7 +351,7 @@ func (s *SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 }
 
 // SetUserPassword executes vpncmd and updates a specific User's password in a specific Hub.
-func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int) {
+func (s SoftEther) SetUserPassword(id string, password string) (returnCode int) {
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserPasswordSet [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
 	cmd := exec.Command(
@@ -377,7 +377,7 @@ func (s *SoftEther) SetUserPassword(id string, password string) (returnCode int)
 }
 
 // SetUserAlias executes vpncmd and updates a specific User's information in a specific Hub.
-func (s *SoftEther) SetUserInfo(id, email, description string) (returnCode int) {
+func (s SoftEther) SetUserInfo(id, email, description string) (returnCode int) {
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserSet [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
@@ -406,7 +406,7 @@ func (s *SoftEther) SetUserInfo(id, email, description string) (returnCode int) 
 }
 
 // DeleteUser executes vpncmd and deletes a specific User in a specific Hub.
-func (s *SoftEther) DeleteUser(id string) (returnCode int) {
+func (s SoftEther) DeleteUser(id string) (returnCode int) {
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserDelete [NAME]
 	cmd := exec.Command(
@@ -431,7 +431,7 @@ func (s *SoftEther) DeleteUser(id string) (returnCode int) {
 }
 
 // DisconnectSession executes vpncmd and disconnects a specific session
-func (s *SoftEther) DisconnectSession(sessionName string) (returnCode int) {
+func (s SoftEther) DisconnectSession(sessionName string) (returnCode int) {
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionDisconnect [SESSION_NAME]
 	cmd := exec.Command(
@@ -455,12 +455,19 @@ func (s *SoftEther) DisconnectSession(sessionName string) (returnCode int) {
 	return
 }
 
-// ExpireUser executes vpncmd expires a specified Username
-func (s *SoftEther) ExpireUser(username string) (returnCode int) {
+// UserEnabled executes vpncmd expires a specified Username
+func (s SoftEther) UserEnabled(username string, enabled bool) (returnCode int) {
+	var (
+		expirationDate string
+	)
 
-	// Get current time, set to one day before
-	t := time.Now()
-	expirationDate := t.AddDate(0, 0, -1).Format("2006/01/02 15:04:05")
+	if enabled == false {
+		// Get current time, set to one day before
+		t := time.Now()
+		expirationDate = t.AddDate(0, 0, -1).Format("2006/01/02 15:04:05")
+	} else {
+		expirationDate = "none"
+	}
 
 	// Command to execute
 	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserExpiresSet [SESSION_NAME] /EXPIRES:[EXPIRATION_DATE}]

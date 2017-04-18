@@ -14,7 +14,7 @@ var printMap = func(m map[string]string) {
 }
 
 func main() {
-	s := softether.SoftEther{IP: "34.201.9.166", Password: "subspace", Hub: "subspace"}
+	s := softether.SoftEther{IP: "34.205.41.236", Password: "subspace", Hub: "subspace"}
 
 	// Get Server Status
 	serverStatus, _ := s.GetServerStatus()
@@ -57,11 +57,18 @@ func main() {
 	printMap(updatedUser)
 
 	// Revoke user
-	s.ExpireUser("1")
+	s.UserEnabled("1", false)
 	revokedUser, _ := s.GetUserInfo("1")
 	fmt.Println("Revoked User")
 	fmt.Println("------------------")
 	printMap(revokedUser)
+
+	// Reenable user
+	s.UserEnabled("1", true)
+	enabledUser, _ := s.GetUserInfo("1")
+	fmt.Println("Revoked User")
+	fmt.Println("------------------")
+	printMap(enabledUser)
 
 	// Delete the user
 	s.DeleteUser("1")
