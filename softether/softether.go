@@ -19,6 +19,9 @@ type SoftEther struct {
 	Hub      string
 }
 
+
+const SOFT_ETHER_TABLE_HEADER_KEY = "Item"
+
 var reFindIntegers = regexp.MustCompile("[0-9]+")
 var cleanBytesOutput = func(aString string) (int, error) {
 	return strconv.Atoi(strings.Join(reFindIntegers.FindAllString(aString, -1), ""))
@@ -114,6 +117,10 @@ func (s SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, r
 			s := strings.Split(outputScanner.Text(), "|")
 			s[0] = strings.Trim(s[0], " ")
 
+			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
+				continue  // Skip table header
+			}
+
 			if _, ok := sessionListMap[pos]; !ok {
 				sessionListMap[pos] = make(map[string]string)
 			}
@@ -148,7 +155,7 @@ func (s SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]st
 	)
 
 	// Local variables
-	sessionInfoMap := make(map[string]string)
+	sessionInfo = make(map[string]string)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
 
 	// Attach buffer to command output and execute
@@ -165,57 +172,37 @@ func (s SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]st
 		if strings.Contains(outputScanner.Text(), "|") {
 			s := strings.Split(outputScanner.Text(), "|")
 			s[0] = strings.Trim(s[0], " ")
-			sessionInfoMap[s[0]] = s[1]
+
+			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
+				continue  // Skip table header
+			}
+
+			sessionInfo[s[0]] = s[1]
 		}
 	}
 
-	// Perform calculations for outgoing and incoming traffic
-	formatOutgoingBytes, _ := cleanBytesOutput(sessionInfoMap["Outgoing Data Size"])
-	formatIncomingBytes, _ := cleanBytesOutput(sessionInfoMap["Incoming Data Size"])
-	outgoingBytes := strconv.Itoa(formatOutgoingBytes)
-	incomingBytes := strconv.Itoa(formatIncomingBytes)
-
-	// Put it all together
-	sessionInfo = map[string]string{
-		"clientIPAddress":                sessionInfoMap["Client IP Address"],
-		"clientHostName":                 sessionInfoMap["Client Host Name"],
-		"userNameAuthentication":         sessionInfoMap["User Name (Authentication)"],
-		"userNameDatabase":               sessionInfoMap["User Name (Database)"],
-		"vlanID":                         sessionInfoMap["VLAN ID"],
-		"serverProductName":              sessionInfoMap["Server Product Name"],
-		"serverVersion":                  sessionInfoMap["Server Version"],
-		"serverBuild":                    sessionInfoMap["Server Build"],
-		"connectionStartedAt":            sessionInfoMap["Connection Started at"][0:11] + sessionInfoMap["Connection Started at"][17:],
-		"firstSessionEstablishedSince":   sessionInfoMap["First Session has been Established since"][0:11] + sessionInfoMap["First Session has been Established since"][17:],
-		"currentSessionEstablishedSince": sessionInfoMap["Current Session has been Established since"][0:11] + sessionInfoMap["Current Session has been Established since"][17:],
-		"halfDuplexTCPConnectionMode":    sessionInfoMap["Half Duplex TCP Connection Mode"],
-		"voipQosFunction":                sessionInfoMap["VoIP / QoS Function"],
-		"numberOfTCPConnections":         sessionInfoMap["Number of TCP Connections"],
-		"maximumNumberOfTCPConnections":  sessionInfoMap["Maximum Number of TCP Connections"],
-		"encryption":                     sessionInfoMap["Encryption"],
-		"compression":                    sessionInfoMap["Use of Compression"],
-		"physicalUnderlayProtocol":       sessionInfoMap["Physical Underlay Protocol"],
-		"udpAccelerationSupported":       sessionInfoMap["UDP Acceleration is Supported"],
-		"udpAccelerationActive":          sessionInfoMap["UDP Acceleration is Active"],
-		"sessionName":                    sessionInfoMap["Session Name"],
-		"connectionName":                 sessionInfoMap["Connection Name"],
-		"sessionKey":                     sessionInfoMap["Session Key (160 bit)"],
-		"bridgeRouterMode":               sessionInfoMap["Bridge / Router Mode"],
-		"monitoringMode":                 sessionInfoMap["Monitoring Mode"],
-		"clientProductNameReported":      sessionInfoMap["Client Product Name (Reported)"],
-		"clientVersionReported":          sessionInfoMap["Client Version (Reported)"],
-		"clientBuildReported":            sessionInfoMap["Client Build (Reported)"],
-		"clientOSNameReported":           sessionInfoMap["Client OS Name (Reported)"],
-		"clientOSVersionReported":        sessionInfoMap["Client OS Version (Reported)"],
-		"clientOSProductIDReported":      sessionInfoMap["Client OS Product ID (Reported)"],
-		"clientHostNameReported":         sessionInfoMap["Client Host Name (Reported)"],
-		"clientIPAddressReported":        sessionInfoMap["Client IP Address  (Reported)"],
-		"clientPortReported":             sessionInfoMap["Client Port (Reported)"],
-		"serverHostNameReported":         sessionInfoMap["Server Host Name (Reported)"],
-		"serverIPAddressReported":        sessionInfoMap["Server IP Address (Reported)"],
-		"serverPortReported":             sessionInfoMap["Server Port (Reported)"],
-		"incomingBytes":                  incomingBytes,
-		"outgoingBytes":                  outgoingBytes,
+	for key, value := range sessionInfo {
+		switch key {
+		case
+			"Outgoing Data Size",
+			"Incoming Data Size",
+			"Outgoing Unicast Packets",
+			"Outgoing Unicast Total Size",
+			"Outgoing Broadcast Packets",
+			"Outgoing Broadcast Total Size",
+			"Incoming Unicast Packets",
+			"Incoming Unicast Total Size",
+			"Incoming Broadcast Packets",
+			"Incoming Broadcast Total Size":
+			// Convert "4,734,874 bytes" to "4734874"
+			formattedValue, _ := cleanBytesOutput(value)
+			sessionInfo[key] = strconv.Itoa(formattedValue)
+		case
+			"First Session has been Established since",
+			"Current Session has been Established since":
+			// Convert "2017-04-19 (Wed) 02:05:16" to "2017-04-19 02:05:16"
+			sessionInfo[key] = value[0:11] + value[17:]
+		}
 	}
 
 	return
