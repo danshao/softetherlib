@@ -208,6 +208,64 @@ func (s SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]st
 	return
 }
 
+// GetUserList executes vpncmd and gets the user list from the SoftEther server for a specific Hub.
+func (s SoftEther) GetUserList() (userListMap map[int]map[string]string, returnCode int) {
+
+	// Command to execute
+	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionList
+	cmd := exec.Command(
+		"vpncmd",
+		"/server", s.IP,
+		"/password:"+s.Password,
+		"/hub:"+s.Hub,
+		"/cmd",
+		"UserList",
+	)
+
+	// Local variables
+	userListMap = make(map[int]map[string]string)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run()
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	// Prepare iostream and extract data
+	outputScanner := bufio.NewScanner(bytes.NewReader(cmdOutput.Bytes()))
+	pos := 0
+	for outputScanner.Scan() {
+		if strings.Contains(outputScanner.Text(), "|") {
+			s := strings.Split(outputScanner.Text(), "|")
+			s[0] = strings.Trim(s[0], " ")
+
+			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
+				continue  // Skip table header
+			}
+
+			if _, ok := userListMap[pos]; !ok {
+				userListMap[pos] = make(map[string]string)
+			}
+
+			if s[0] == "Transfer Bytes" || s[0] == "Transfer Packets" {
+				aBytes, _ := cleanBytesOutput(s[1])
+				s[1] = strconv.Itoa(aBytes)
+			}
+
+			userListMap[pos][s[0]] = s[1]
+
+			if s[0] == "Transfer Packets" {
+				pos++
+			}
+		}
+	}
+
+	return
+}
+
 // GetUserInfo executes vpncmd and gets the details of a specific User for a specific Hub.
 func (s SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCode int) {
 
@@ -223,7 +281,7 @@ func (s SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCod
 	)
 
 	// Local variables
-	userInfoMap := make(map[string]string)
+	userInfo = make(map[string]string)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
 
 	// Attach buffer to command output and execute
@@ -240,28 +298,35 @@ func (s SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCod
 		if strings.Contains(outputScanner.Text(), "|") {
 			s := strings.Split(outputScanner.Text(), "|")
 			s[0] = strings.Trim(s[0], " ")
-			userInfoMap[s[0]] = s[1]
+
+			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
+				continue  // Skip table header
+			}
+
+			userInfo[s[0]] = s[1]
 		}
 	}
 
-	// Perform calculations for outgoing and incoming traffic
-	outgoingUnicastBytes, _ := cleanBytesOutput(userInfoMap["Outgoing Unicast Total Size"])
-	outgoingBroadcastBytes, _ := cleanBytesOutput(userInfoMap["Outgoing Broadcast Total Size"])
-	incomingUnicastBytes, _ := cleanBytesOutput(userInfoMap["Incoming Unicast Total Size"])
-	incomingBroadcastBytes, _ := cleanBytesOutput(userInfoMap["Incoming Broadcast Total Size"])
-	outgoingTotalBytes := strconv.Itoa(outgoingBroadcastBytes + outgoingUnicastBytes)
-	incomingTotalBytes := strconv.Itoa(incomingBroadcastBytes + incomingUnicastBytes)
-
-	// Put it all together
-	userInfo = map[string]string{
-		"description":    userInfoMap["Description"],
-		"email":          userInfoMap["Full Name"],
-		"numberOfLogins": userInfoMap["Number of Logins"],
-		"expirationDate": userInfoMap["Expiration Date"],
-		"creationDate":   userInfoMap["Created on"][0:11] + userInfoMap["Created on"][17:],
-		"updatedDate":    userInfoMap["Updated on"][0:11] + userInfoMap["Updated on"][17:],
-		"incomingBytes":  incomingTotalBytes,
-		"outgoingBytes":  outgoingTotalBytes,
+	for key, value := range userInfo {
+		switch key {
+		case
+			"Outgoing Unicast Packets",
+			"Outgoing Unicast Total Size",
+			"Outgoing Broadcast Packets",
+			"Outgoing Broadcast Total Size",
+			"Incoming Unicast Packets",
+			"Incoming Unicast Total Size",
+			"Incoming Broadcast Packets",
+			"Incoming Broadcast Total Size":
+			// Convert "4,734,874 bytes" to "4734874"
+			formattedValue, _ := cleanBytesOutput(value)
+			userInfo[key] = strconv.Itoa(formattedValue)
+		case
+			"Created on",
+			"Updated on":
+			// Convert "2017-04-19 (Wed) 02:05:16" to "2017-04-19 02:05:16"
+			userInfo[key] = value[0:11] + value[17:]
+		}
 	}
 
 	return
