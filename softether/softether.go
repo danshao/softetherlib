@@ -250,11 +250,6 @@ func (s SoftEther) GetUserList() (userListMap map[int]map[string]string, returnC
 				userListMap[pos] = make(map[string]string)
 			}
 
-			if s[0] == "Transfer Bytes" || s[0] == "Transfer Packets" {
-				aBytes, _ := cleanBytesOutput(s[1])
-				s[1] = strconv.Itoa(aBytes)
-			}
-
 			userListMap[pos][s[0]] = s[1]
 
 			if s[0] == "Transfer Packets" {
@@ -262,7 +257,25 @@ func (s SoftEther) GetUserList() (userListMap map[int]map[string]string, returnC
 			}
 		}
 	}
-
+	for _, user := range userListMap {
+		fmt.Println(user)
+		for key, value := range user {
+			switch key {
+			case
+				"Transfer Bytes",
+				"Transfer Packets":
+				// Convert "4,734,874 bytes" to "4734874"
+				formattedValue, _ := cleanBytesOutput(value)
+				user[key] = strconv.Itoa(formattedValue)
+			case
+				"Last Login":
+				// Convert "2017-04-19 (Wed) 02:05:16" to "2017-04-19 02:05:16"
+				if "(None)" != value {
+					user[key] = value[0:11] + value[17:]
+				}
+			}
+		}
+	}
 	return
 }
 
