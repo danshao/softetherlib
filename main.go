@@ -14,7 +14,7 @@ var printMap = func(m map[string]string) {
 }
 
 func main() {
-	s := softether.SoftEther{IP: "34.205.41.236", Password: "subspace", Hub: "subspace"}
+	s := softether.SoftEther{IP: "54.88.147.168", Password: "subspace", Hub: "subspace"}
 
 	// Get Server Status
 	serverStatus, _ := s.GetServerStatus()
