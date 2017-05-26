@@ -568,6 +568,37 @@ func (s SoftEther) SetUserEnabled(username string, enabled bool) (returnCode int
 	return
 }
 
+// SetPreSharedKey executes vpncmd to modify the preshared key
+func (s SoftEther) SetPreSharedKey(preSharedKey string) (returnCode int) {
+	// Command to execute
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /cmd IPsecEnable [/L2TP:yes|no] [/L2TPRAW:yes|no] [/ETHERIP:yes|no] [/PSK:pre-shared-key] [/DEFAULTHUB:default_hub]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server",
+		s.IP+":992",
+		"/password:"+s.Password,
+		"/cmd",
+		"IPsecEnable",
+		"/L2TP:yes",
+		"/L2TPRAW:no",
+		"/ETHERIP:no",
+		"/DEFAULTHUB:"+s.Hub,
+		"/PSK:"+preSharedKey,
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+	printCommand(cmd)
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run() // will wait for command to return
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	return
+}
+
 func printCommand(cmd *exec.Cmd) {
 	fmt.Printf("==> Executing: %s\n", strings.Join(cmd.Args, " "))
 }
