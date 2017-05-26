@@ -14,13 +14,18 @@ var printMap = func(m map[string]string) {
 }
 
 func main() {
-	s := softether.SoftEther{IP: "34.205.41.236", Password: "subspace", Hub: "subspace"}
+	s := softether.SoftEther{IP: "54.89.114.55", Password: "subspace", Hub: "subspace"}
 
 	// Get Server Status
 	serverStatus, _ := s.GetServerStatus()
 	fmt.Println("Server Status")
 	fmt.Println("-------------")
 	printMap(serverStatus)
+
+	// Set PreShared Key
+	err := s.SetPreSharedKey("abcdefg")
+	fmt.Println(err)
+	fmt.Println("ERROR: ", softether.Strerror(err))
 
 	// Get Session List
 	sessionList, _ := s.GetSessionList()
@@ -76,5 +81,4 @@ func main() {
 	fmt.Println("User Deleted")
 	fmt.Println("------------")
 	fmt.Println("Return Code: ", softether.Strerror(err))
-
 }

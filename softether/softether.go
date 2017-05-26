@@ -19,7 +19,6 @@ type SoftEther struct {
 	Hub      string
 }
 
-
 const SOFT_ETHER_TABLE_HEADER_KEY = "Item"
 
 var reFindIntegers = regexp.MustCompile("[0-9]+")
@@ -31,10 +30,11 @@ var cleanBytesOutput = func(aString string) (int, error) {
 func (s SoftEther) GetServerStatus() (status map[string]string, returnCode int) {
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /cmd ServerStatusGet
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /cmd ServerStatusGet
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/cmd",
 		"ServerStatusGet",
@@ -87,10 +87,11 @@ func (s SoftEther) GetServerStatus() (status map[string]string, returnCode int) 
 func (s SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, returnCode int) {
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionList
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd SessionList
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -118,7 +119,7 @@ func (s SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, r
 			s[0] = strings.Trim(s[0], " ")
 
 			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
-				continue  // Skip table header
+				continue // Skip table header
 			}
 
 			if _, ok := sessionListMap[pos]; !ok {
@@ -144,10 +145,11 @@ func (s SoftEther) GetSessionList() (sessionListMap map[int]map[string]string, r
 // GetSessionInfo executes vpncmd and gets the session information for a specific Session Name
 func (s SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]string, returnCode int) {
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionGet [SESSION_NAME]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd SessionGet [SESSION_NAME]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -174,7 +176,7 @@ func (s SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]st
 			s[0] = strings.Trim(s[0], " ")
 
 			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
-				continue  // Skip table header
+				continue // Skip table header
 			}
 
 			sessionInfo[s[0]] = s[1]
@@ -212,10 +214,11 @@ func (s SoftEther) GetSessionInfo(sessionName string) (sessionInfo map[string]st
 func (s SoftEther) GetUserList() (userListMap map[int]map[string]string, returnCode int) {
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionList
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd SessionList
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -243,7 +246,7 @@ func (s SoftEther) GetUserList() (userListMap map[int]map[string]string, returnC
 			s[0] = strings.Trim(s[0], " ")
 
 			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
-				continue  // Skip table header
+				continue // Skip table header
 			}
 
 			if _, ok := userListMap[pos]; !ok {
@@ -283,10 +286,11 @@ func (s SoftEther) GetUserList() (userListMap map[int]map[string]string, returnC
 func (s SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCode int) {
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserGet [NAME]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd UserGet [NAME]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -313,7 +317,7 @@ func (s SoftEther) GetUserInfo(id string) (userInfo map[string]string, returnCod
 			s[0] = strings.Trim(s[0], " ")
 
 			if SOFT_ETHER_TABLE_HEADER_KEY == s[0] {
-				continue  // Skip table header
+				continue // Skip table header
 			}
 
 			userInfo[s[0]] = s[1]
@@ -390,10 +394,11 @@ func (s SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 	}
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserCreate [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd UserCreate [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -418,10 +423,11 @@ func (s SoftEther) CreateUser(args ...interface{}) (returnCode int) {
 // SetUserPassword executes vpncmd and updates a specific User's password in a specific Hub.
 func (s SoftEther) SetUserPassword(id string, password string) (returnCode int) {
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserPasswordSet [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd UserPasswordSet [NAME] /GROUP:[GROUP] /REALNAME:[ALIAS] /NOTE:[EMAIL]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -445,10 +451,11 @@ func (s SoftEther) SetUserPassword(id string, password string) (returnCode int) 
 func (s SoftEther) SetUserInfo(id, email, description string) (returnCode int) {
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserSet [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd UserSet [NAME] /GROUP:[GROUP] /REALNAME:[EMAIL] /NOTE:[DESCRIPTION]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -473,10 +480,11 @@ func (s SoftEther) SetUserInfo(id, email, description string) (returnCode int) {
 // DeleteUser executes vpncmd and deletes a specific User in a specific Hub.
 func (s SoftEther) DeleteUser(id string) (returnCode int) {
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserDelete [NAME]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd UserDelete [NAME]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -498,10 +506,11 @@ func (s SoftEther) DeleteUser(id string) (returnCode int) {
 // DisconnectSession executes vpncmd and disconnects a specific session
 func (s SoftEther) DisconnectSession(sessionName string) (returnCode int) {
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd SessionDisconnect [SESSION_NAME]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd SessionDisconnect [SESSION_NAME]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -535,10 +544,11 @@ func (s SoftEther) SetUserEnabled(username string, enabled bool) (returnCode int
 	}
 
 	// Command to execute
-	// vpncmd /server [IP] /password:[PASSWORD] /hub:[HUB] /cmd UserExpiresSet [SESSION_NAME] /EXPIRES:[EXPIRATION_DATE}]
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /hub:[HUB] /cmd UserExpiresSet [SESSION_NAME] /EXPIRES:[EXPIRATION_DATE}]
 	cmd := exec.Command(
 		"vpncmd",
-		"/server", s.IP,
+		"/server",
+		s.IP+":992",
 		"/password:"+s.Password,
 		"/hub:"+s.Hub,
 		"/cmd",
@@ -546,6 +556,37 @@ func (s SoftEther) SetUserEnabled(username string, enabled bool) (returnCode int
 		"/expires:"+expirationDate,
 	)
 	cmdOutput := &bytes.Buffer{} // Stdout buffer
+
+	// Attach buffer to command output and execute
+	cmd.Stdout = cmdOutput
+	err := cmd.Run() // will wait for command to return
+	if err != nil {
+		returnCode, _ = strconv.Atoi(reFindIntegers.FindAllString(err.Error(), -1)[0])
+		return
+	}
+
+	return
+}
+
+// SetPreSharedKey executes vpncmd to modify the preshared key
+func (s SoftEther) SetPreSharedKey(preSharedKey string) (returnCode int) {
+	// Command to execute
+	// vpncmd /server [IP]:992 /password:[PASSWORD] /cmd IPsecEnable [/L2TP:yes|no] [/L2TPRAW:yes|no] [/ETHERIP:yes|no] [/PSK:pre-shared-key] [/DEFAULTHUB:default_hub]
+	cmd := exec.Command(
+		"vpncmd",
+		"/server",
+		s.IP+":992",
+		"/password:"+s.Password,
+		"/cmd",
+		"IPsecEnable",
+		"/L2TP:yes",
+		"/L2TPRAW:no",
+		"/ETHERIP:no",
+		"/DEFAULTHUB:"+s.Hub,
+		"/PSK:"+preSharedKey,
+	)
+	cmdOutput := &bytes.Buffer{} // Stdout buffer
+	printCommand(cmd)
 
 	// Attach buffer to command output and execute
 	cmd.Stdout = cmdOutput
